@@ -9,6 +9,7 @@ end
 
 -- Treat each top-level heading as a chapter. Count the words for each chapter
 function M.compute_chapter_word_count()
+        local start = nil
 	local start_lines = {}
 	local chapter_data = {}
 
