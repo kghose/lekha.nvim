@@ -7,10 +7,7 @@ needed while writing my novel but I wanted a few additional things.
 - Quick navigation to TODOs I put in a chapter
 
 ## Current state
-- Use a command to print word count for each chapter.
-
-This is buggy: using it more than once raises an error.
-
+Use command `lua require('lekha').cwc()` to print word count for each chapter.
 
 ## Planned Features
 Replace Outline with a navigation bar (just like outline) except with word
