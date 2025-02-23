@@ -24,7 +24,7 @@ function M.compute_chapter_word_count()
 			start = n
 			chapter_words = 0
 			chapter_data[start] = {
-				heading = line,
+				heading = line:sub(3,-1),
 				start = start,
 				stop = start,
 				word_count = 0,
@@ -51,7 +51,7 @@ end
 function M.print_chapter_word_count(chapters)
 	-- table.sort(chapters.section_start_lines)
 	for i, s in ipairs(chapters.start_lines) do
-		print(string.format("%s (%d)", chapters.info[s].heading, chapters.info[s].word_count))
+		print(string.format("%3d. %s (%d)", i, chapters.info[s].heading, chapters.info[s].word_count))
 	end
 end
 
