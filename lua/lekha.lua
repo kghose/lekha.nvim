@@ -1,5 +1,5 @@
 -- Activate with lua require('lekha').enable()
---
+
 local M = {}
 
 function words_in_line(line)
@@ -7,6 +7,7 @@ function words_in_line(line)
 	return n
 end
 
+-- Module global to store chapter locations and word counts
 local chapters = {}
 
 -- Treat each top-level heading as a chapter. Count the words for each chapter
@@ -15,14 +16,17 @@ function M.compute_chapter_word_count()
 	local start_line_array = {}
 	-- Ordered array table of chapter names
 	local chapter_names = {}
-	-- index start lines by chapter name
+	-- map chapter name to first line
 	local name_to_line_map = {}
-	-- index chapter info by start lines
+	-- map start line to chapter info
 	local line_to_info_map = {}
 
 	local lines = vim.api.nvim_buf_get_lines(0, 0, -1, false)
 	local chapter_words = 0
-	local start = nil
+	-- if start is not declared as nil and used in the loop below, apparently
+	-- it declares a module global called start that persists bewtween
+	-- function calls
+	local start = nil 
 	for n, line in ipairs(lines) do
 		if line:sub(1, 2) == "# " then
 			if start ~= nil then
@@ -53,7 +57,7 @@ function M.compute_chapter_word_count()
 	end
 
 	-- In Lua only an array table can be sorted
-	table.sort(start_line_array)
+	-- table.sort(start_line_array)
 	chapters = {
 		start_line_array = start_line_array,
 		chapter_names = chapter_names,
@@ -62,25 +66,35 @@ function M.compute_chapter_word_count()
 	}
 end
 
-function M.print_chapter_word_count()
+
+-- This returns an array table of strings that are formatted as
+-- N MM MM (X)
+-- Where 
+--   N is the sequential chapter number, 
+--   MM MM is the chapter name
+--   X is the word count
+-- This is a visually acceptable way to list the information and
+-- it can also be used as an input to the "go to chapter" command
+-- which just uses the first term to index into the data  
+function M.get_chapter_info_list()
+	local chapter_list = {} 
 	if chapters == nil then
-		return
+		return chapter_list
 	end
 
 	for i, s in ipairs(chapters.start_line_array) do
 		local info = chapters.line_to_info_map[s]
-		print(string.format("%3d. %s (%d)", i, info.heading, info.word_count))
+		table.insert(chapter_list, string.format("%3d %s (%d)", i, info.heading, info.word_count))
 	end
+
+	return chapter_list
 end
 
-function M.chapter_list()
-	if chapters == nil then
-		return
-	else
-		return chapters.chapter_names
-	end
-end
 
+-- NeoVim passes in args
+-- args.args carries the full string
+-- args.fargs carries the individual space separated arguments
+-- We just want the first word which is the chapter number
 function M.goto_chapter(args)
 	if chapters == nil then
 		return
@@ -90,13 +104,11 @@ function M.goto_chapter(args)
 		return
 	end
 
-	local chapter_name = args.args
-
-	local line = chapters.name_to_line_map[chapter_name]
+	local line = chapters.start_line_array[tonumber(args.fargs[1])]
 	if line == nil then
 		return
 	end
-	vim.api.nvim_command(string.format("%d", line))
+	vim.api.nvim_command(tostring(line))
 end
 
 function M.enable()
@@ -114,13 +126,12 @@ function M.enable()
 		callback = M.compute_chapter_word_count,
 	})
 
-	vim.api.nvim_create_user_command("LekhaShowChapters", M.print_chapter_word_count, {})
 	-- :h :command-nargs
-	-- has to be in single quotes "+" won't work ...
+	-- nargs has to be in single quotes "+" won't work ...
 	vim.api.nvim_create_user_command(
 		"LekhaGotoChapter",
 		M.goto_chapter,
-		{ desc = "Go to chapter", nargs = "+", complete = M.chapter_list }
+		{ desc = "Go to chapter", nargs = "+", complete = M.get_chapter_info_list }
 	)
 end
 
