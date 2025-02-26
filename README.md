@@ -1,10 +1,22 @@
-While [outline.nvim](https://github.com/hedyhli/outline.nvim) does most of what I 
-needed while writing my novel, I wanted a few additional things.
+# Lekha.nvim
 
-- Word counts for each chapter
-- Quick navigation to TODOs I put in a chapter
+![](lekha.nvim.png)
 
-## Installation
+While [outline.nvim](https://github.com/hedyhli/outline.nvim) does most of what
+I needed while writing my novel (and way more powerful than I need) I wanted a
+few additional things.
+
+This plugin in very minimal but does the things I need while writing and gets
+out of my way:
+
+- There is no split pane: It uses NeoVim's auto complete feature to display the
+  chapters and word counts.
+- Only looks at top level headings (Lines that start with `# `)
+- Currently only provides a jump to chapter command, but I want to add a jump to
+  TODO command and a fast "you are currently in chapter X" command for use in
+  the status line.
+
+# Installation
 
 `git clone` the repository (or just copy the `lua` folder) to somewhere in your
 runtime path. Then add something like this to your `markdown.vim`:
@@ -16,13 +28,16 @@ nmap <Tab> :LekhaGotoChapter
 
 Now by hitting Tab twice in normal mode you can access the go to chapter command.
 
+# Notes
 
-## Features
-- [x] List chapters and word counts
-- [x] Navigate to chapter
-- [ ] Show TODOs
-- [ ] Navigate TODOs
-- [ ] Show chapter for current line
+1. I had little trouble writing the NeoVim plugin in Lua though I had never
+   written a NeoVim plugin before and didn't know Lua. The NeoVim documentation
+   is adequate though I had to supplement with reddit and stackoverflow searches
+   for a few things which were either hard to find keywords for in the API docs,
+   or which were not actually that well explained.
+1. Vim (and NeoVim's) efficiency impresses me. I have a 140,000 word manuscript
+   and the dumb algorithm I implemented here doesn't take any perceptible time
+   to run.
 
 
 # References
