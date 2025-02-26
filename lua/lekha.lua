@@ -26,7 +26,7 @@ function M.compute_chapter_word_count()
 	-- if start is not declared as nil and used in the loop below, apparently
 	-- it declares a module global called start that persists bewtween
 	-- function calls
-	local start = nil 
+	local start = nil
 	for n, line in ipairs(lines) do
 		if line:sub(1, 2) == "# " then
 			if start ~= nil then
@@ -43,6 +43,7 @@ function M.compute_chapter_word_count()
 				word_count = 0,
 			}
 			name_to_line_map[heading] = start
+			-- In Lua only an array table can be ordered
 			table.insert(start_line_array, start)
 			table.insert(chapter_names, heading)
 		end
@@ -66,18 +67,17 @@ function M.compute_chapter_word_count()
 	}
 end
 
-
 -- This returns an array table of strings that are formatted as
 -- N MM MM (X)
--- Where 
---   N is the sequential chapter number, 
+-- Where
+--   N is the sequential chapter number,
 --   MM MM is the chapter name
 --   X is the word count
 -- This is a visually acceptable way to list the information and
 -- it can also be used as an input to the "go to chapter" command
--- which just uses the first term to index into the data  
+-- which just uses the first term to index into the data
 function M.get_chapter_info_list()
-	local chapter_list = {} 
+	local chapter_list = {}
 	if chapters == nil then
 		return chapter_list
 	end
@@ -89,7 +89,6 @@ function M.get_chapter_info_list()
 
 	return chapter_list
 end
-
 
 -- NeoVim passes in args
 -- args.args carries the full string
@@ -109,6 +108,24 @@ function M.goto_chapter(args)
 		return
 	end
 	vim.api.nvim_command(tostring(line))
+end
+
+function M.current_chapter()
+	if chapters == nil then
+		return
+	end
+
+	local current_chapter = "None"
+	row, col = unpack(vim.api.nvim_win_get_cursor(0))
+	for i, sl in ipairs(chapters.start_line_array) do
+		if row < sl then
+			break
+		else
+			current_chapter = chapters.chapter_names[i]
+		end
+	end
+
+	return current_chapter
 end
 
 function M.enable()

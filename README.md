@@ -13,9 +13,8 @@ writing needs:
   chapters and word counts when the "jump to chapter" command is called. This
   reduces visual clutter but keeps the information accessible.
 - Only looks at top level headings (Lines that start with `# `)
-- Currently only provides a jump to chapter command, but I want to add
-  - a jump to TODO command 
-  - a fast "you are currently in chapter X" command for use in the status line.
+- Currently only provides a jump to chapter command, but I want to add a jump to
+  TODO command 
 
 # Installation
 
@@ -28,6 +27,12 @@ nmap <Tab> :LekhaGotoChapter
 ```
 
 Now by hitting Tab twice in normal mode you can access the go to chapter command.
+
+## Use in statusline
+
+Add `%{%v:lua.require'lekha'.current_chapter()%}` to the status line to print 
+the chapter the cursor is in.
+
 
 # Notes
 
