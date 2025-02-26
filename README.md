@@ -2,19 +2,20 @@
 
 ![](lekha.nvim.png)
 
-While [outline.nvim](https://github.com/hedyhli/outline.nvim) does most of what
-I needed while writing my novel (and way more powerful than I need) I wanted a
-few additional things.
+For my novel writing needs,
+[outline.nvim](https://github.com/hedyhli/outline.nvim) was both way more
+powerful than I needed and not powerful enough. 
 
-This plugin in very minimal but does the things I need while writing and gets
-out of my way:
+This plugin is minimalistic (in appearance and function) but is perfect for my
+writing needs:
 
 - There is no split pane: It uses NeoVim's auto complete feature to display the
-  chapters and word counts.
+  chapters and word counts when the "jump to chapter" command is called. This
+  reduces visual clutter but keeps the information accessible.
 - Only looks at top level headings (Lines that start with `# `)
-- Currently only provides a jump to chapter command, but I want to add a jump to
-  TODO command and a fast "you are currently in chapter X" command for use in
-  the status line.
+- Currently only provides a jump to chapter command, but I want to add
+  - a jump to TODO command 
+  - a fast "you are currently in chapter X" command for use in the status line.
 
 # Installation
 
