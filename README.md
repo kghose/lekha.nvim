@@ -2,19 +2,15 @@
 
 ![](lekha.nvim.png)
 
-For my novel writing needs,
-[outline.nvim](https://github.com/hedyhli/outline.nvim) was both way more
-powerful than I needed and not powerful enough. 
+`Lekha` is a minimalistic (in appearance and function) NeoVim plugin for novel
+writing:
 
-`Lekha` is minimalistic (in appearance and function) but is perfect for my
-writing needs:
-
-- There is no split pane: It uses NeoVim's auto complete feature to display the
-  chapters and word counts when the "jump to chapter" command is called. This
+- It uses NeoVim's auto complete feature to display the chapters and word counts
+  when the "jump to chapter" command is called. There is no split pane. This
   reduces visual clutter but keeps the information accessible.
 - Only looks at top level headings (Lines that start with `# `)
-- Currently only provides a jump to chapter command, but I want to add a jump to
-  TODO command 
+- [Planned]: TODO and Bookmarks lists
+
 
 # Installation
 
@@ -28,7 +24,8 @@ lua require("lekha").enable()
 nmap <Tab> :LekhaGotoChapter<Space>
 ```
 
-Now by hitting Tab twice in normal mode you can access the go to chapter command.
+Now by hitting Tab twice in normal mode you can access the go to chapter command
+and see and navigate through a list of chapters.
 
 ## Use in statusline
 
@@ -53,5 +50,8 @@ the chapter the cursor is in.
 
 # References
 
+1. [outline.nvim](https://github.com/hedyhli/outline.nvim) is both way more
+powerful and not powerful enough for my writing needs. It has a split-pane
+outline view, but not per-chapter word count and no TODO/bookmark feature. 
 1. [minimal-bookmarks.nvim](https://github.com/yuriescl/minimal-bookmarks.nvim)
 1. [section-wordcount.nvim](https://github.com/dimfeld/section-wordcount.nvim)
