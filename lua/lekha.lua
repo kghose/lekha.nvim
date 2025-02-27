@@ -45,9 +45,9 @@ function M.compute_chapter_word_count()
 			table.insert(start_line_array, start)
 			table.insert(chapter_names, heading)
 		end
-		if start ~= nil then
-			chapter_words = chapter_words + words_in_line(line)
-		end
+		-- If we're not in a chapter (i.e. in the preamble) we'll just
+		-- discard this count.
+		chapter_words = chapter_words + words_in_line(line)
 	end
 
 	if start ~= nil then
@@ -107,8 +107,7 @@ function M.goto_chapter(args)
 	vim.api.nvim_command(tostring(line))
 end
 
-
--- Returns a string representation of the chapter the cursor is in 
+-- Returns a string representation of the chapter the cursor is in
 function M.current_chapter()
 	if chapters == nil then
 		return
