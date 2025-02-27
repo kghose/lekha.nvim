@@ -30,7 +30,6 @@ function M.compute_chapter_word_count()
 	for n, line in ipairs(lines) do
 		if line:sub(1, 2) == "# " then
 			if start ~= nil then
-				line_to_info_map[start].stop = n - 1
 				line_to_info_map[start].word_count = chapter_words
 			end
 			heading = line:sub(3, -1)
@@ -39,7 +38,6 @@ function M.compute_chapter_word_count()
 			line_to_info_map[start] = {
 				heading = heading,
 				start = start,
-				stop = start,
 				word_count = 0,
 			}
 			name_to_line_map[heading] = start
@@ -53,7 +51,6 @@ function M.compute_chapter_word_count()
 	end
 
 	if start ~= nil then
-		line_to_info_map[start].stop = table.getn(lines)
 		line_to_info_map[start].word_count = chapter_words
 	end
 
@@ -110,6 +107,8 @@ function M.goto_chapter(args)
 	vim.api.nvim_command(tostring(line))
 end
 
+
+-- Returns a string representation of the chapter the cursor is in 
 function M.current_chapter()
 	if chapters == nil then
 		return
@@ -121,7 +120,7 @@ function M.current_chapter()
 		if row < sl then
 			break
 		else
-			current_chapter = chapters.chapter_names[i]
+			current_chapter = string.format("%d %s", i, chapters.chapter_names[i])
 		end
 	end
 
