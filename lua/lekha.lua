@@ -7,7 +7,7 @@ function words_in_line(line)
 	return n
 end
 
--- Module global to store chapter locations and word counts
+-- Module variable to store chapter locations and word counts
 local chapters = {}
 
 -- Treat each top-level heading as a chapter. Count the words for each chapter
@@ -21,12 +21,16 @@ function M.compute_chapter_word_count()
 	-- map start line to chapter info
 	local line_to_info_map = {}
 
+	-- Module variable to store todo locations
+	todos = {}
+
 	local lines = vim.api.nvim_buf_get_lines(0, 0, -1, false)
 	local chapter_words = 0
 	-- if start is not declared as nil and used in the loop below, apparently
 	-- it declares a module global called start that persists bewtween
 	-- function calls
 	local start = nil
+	local heading = nil
 	for n, line in ipairs(lines) do
 		if line:sub(1, 2) == "# " then
 			if start ~= nil then
@@ -44,6 +48,12 @@ function M.compute_chapter_word_count()
 			-- In Lua only an array table can be ordered
 			table.insert(start_line_array, start)
 			table.insert(chapter_names, heading)
+		elseif line:sub(1, 10) == "<!-- TODO:" then
+			table.insert(todos, {
+				chapter = heading,
+				todo = line:sub(11, -1),
+				line = n,
+			})
 		end
 		-- If we're not in a chapter (i.e. in the preamble) we'll just
 		-- discard this count.
@@ -126,6 +136,43 @@ function M.current_chapter()
 	return current_chapter
 end
 
+-- Returns and array table of strings formatted as
+-- number item (chapter)
+-- This lists the todos and can be passed (as a completion, like the chapters)
+-- to the go to todo function to take us to the todo item
+function M.get_todo_list()
+	local todo_list = {}
+	if todos == nil then
+		return todo_list
+	end
+
+	for i, s in ipairs(todos) do
+		table.insert(todo_list, string.format("%3d [%s] %s", i, s.chapter, s.todo))
+	end
+
+	return todo_list
+end
+
+-- NeoVim passes in args
+-- args.args carries the full string
+-- args.fargs carries the individual space separated arguments
+-- We just want the first word which is the todo number
+function M.goto_todo(args)
+	if todos == nil then
+		return
+	end
+
+	if args.args == nil then
+		return
+	end
+
+	local todo = todos[tonumber(args.fargs[1])]
+	if todo == nil then
+		return
+	end
+	vim.api.nvim_command(tostring(todo.line))
+end
+
 function M.enable()
 	-- Run the word count explicitly the first time
 	M.compute_chapter_word_count()
@@ -147,6 +194,12 @@ function M.enable()
 		"LekhaGotoChapter",
 		M.goto_chapter,
 		{ desc = "Go to chapter", nargs = "+", complete = M.get_chapter_info_list }
+	)
+
+	vim.api.nvim_create_user_command(
+		"LekhaGotoTodo",
+		M.goto_todo,
+		{ desc = "Go to TODO", nargs = "+", complete = M.get_todo_list }
 	)
 end
 
