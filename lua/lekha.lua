@@ -47,43 +47,67 @@ function M.compute_chapter_word_count()
 	chapters[current_chapter].word_count = chapter_words
 end
 
--- This returns an array table of strings that are formatted as
--- N MM MM (X)
--- Where
---   N is the sequential chapter number,
---   MM MM is the chapter name
---   X is the word count
--- This is a visually acceptable way to list the information and
--- it can also be used as an input to the "go to chapter" command
--- which just uses the first term to index into the data
-function M.get_chapter_info_list()
-	local chapter_list = {}
+-- List of strings of chapters and TODOs in one go
+-- Format is <Chapter #>.<todo #> <Chapter or TODO name> [(word count)]a
+-- https://www.lua.org/pil/5.3.html (named arguments hack)
+function M.get_targets_list(arg)
 	if chapters == nil then
-		return chapter_list
+		return {}
 	end
 
-	for i = 2, #chapters do
-		table.insert(chapter_list, string.format("%3d %s (%d)", i - 1, chapters[i].name, chapters[i].word_count))
+	local target_list = {}
+	local todo_i = 1
+	for i = 1, #chapters do
+		if arg.chapters then
+			table.insert(target_list, string.format("%3d %s (%d)", i - 1, chapters[i].name, chapters[i].word_count))
+		end
+		while arg.todos and todo_i <= #todos and todos[todo_i].chapter == i do
+			table.insert(target_list, string.format("%3d.%d %s", i - 1, todo_i, todos[todo_i].todo))
+			todo_i = todo_i + 1
+		end
 	end
 
-	return chapter_list
+	return target_list
 end
 
--- NeoVim passes in args
--- args.args carries the full string
+-- Return just the chapters
+function M.get_chapter_list()
+	return M.get_targets_list({ chapters = true, todos = false })
+end
+
+-- Return just the todos
+function M.get_todo_list()
+	return M.get_targets_list({ chapters = false, todos = true })
+end
+
+-- Return everything
+function M.get_all_targets_list()
+	return M.get_targets_list({ chapters = true, todos = true })
+end
+
+-- NeoVim passes in args when invoking as a user command
 -- args.fargs carries the individual space separated arguments
--- We just want the first word which is the chapter number
--- Chapter number needs +1 to get the right index in `chapters`
-function M.goto_chapter(args)
+-- We just want the first word (args.fargs[1]) which is in the form X.Y
+-- X is the chapter id and Y the todo id (if present)
+function M.goto_target(args)
 	if chapters == nil then
 		return
 	end
 
-	if args.args == nil then
+	if args.fargs == nil then
 		return
 	end
 
-	local line = chapters[tonumber(args.fargs[1]) + 1].line
+	local line = nil
+	-- https://stackoverflow.com/a/15258515
+	local dot_i = args.fargs[1]:find(".", 1, true)
+	if dot_i == nil then
+		-- Goto chapter
+		line = chapters[tonumber(args.fargs[1]) + 1].line
+	else
+		-- Goto todo
+		line = todos[tonumber(args.fargs[1]:sub(dot_i + 1, -1))].line
+	end
 	vim.api.nvim_command(tostring(line))
 end
 
@@ -107,90 +131,6 @@ function M.current_chapter()
 	return current_chapter
 end
 
--- Returns and array table of strings formatted as
--- number item (chapter)
--- This lists the todos and can be passed (as a completion, like the chapters)
--- to the go to todo function to take us to the todo item
-function M.get_todo_list()
-	local todo_list = {}
-	if todos == nil then
-		return todo_list
-	end
-
-	for i, s in ipairs(todos) do
-		table.insert(todo_list, string.format("%3d [%d] %s", i, s.chapter, s.todo))
-	end
-
-	return todo_list
-end
-
--- NeoVim passes in args
--- args.args carries the full string
--- args.fargs carries the individual space separated arguments
--- We just want the first word which is the todo number
-function M.goto_todo(args)
-	if todos == nil then
-		return
-	end
-
-	if args.args == nil then
-		return
-	end
-
-	local todo = todos[tonumber(args.fargs[1])]
-	if todo == nil then
-		return
-	end
-	vim.api.nvim_command(tostring(todo.line))
-end
-
--- List of strings of chapters and TODOs in one go
--- Format is <Chapter #>.<todo #> <Chapter or TODO name> [(word count)]
-function M.get_target_list()
-	local target_list = {}
-	if chapters == nil then
-		return string_list
-	end
-
-	local todo_i = 1
-	for i = 1, #chapters do
-		table.insert(target_list, string.format("%3d %s (%d)", i - 1, chapters[i].name, chapters[i].word_count))
-		while todo_i <= #todos and todos[todo_i].chapter == i do
-			table.insert(target_list, string.format("%3d.%d %s", i - 1, todo_i, todos[todo_i].todo))
-			todo_i = todo_i + 1
-		end
-	end
-
-	return target_list
-end
-
--- NeoVim passes in args
--- args.args carries the full string
--- args.fargs carries the individual space separated arguments
--- We just want the first word (args.fargs[1]) which is in the form X.Y
--- X is the chapter id and Y the todo id (if present)
-function M.goto_target(args)
-	if chapters == nil then
-		return
-	end
-
-	if args.args == nil then
-		return
-	end
-
-	local line = nil
-	-- https://stackoverflow.com/a/15258515
-	local dot_i = args.fargs[1]:find(".", 1, true)
-	if dot_i == nil then
-		-- print(args.fargs[1])
-		line = chapters[tonumber(args.fargs[1]) + 1].line
-	else
-		-- print(args.fargs[1]:sub(dot_i+1, -1))
-		line = todos[tonumber(args.fargs[1]:sub(dot_i + 1, -1))].line
-	end
-	vim.api.nvim_command(tostring(line))
-end
-
 function M.enable()
 	-- Run the word count explicitly the first time
 	M.compute_chapter_word_count()
@@ -210,20 +150,20 @@ function M.enable()
 	-- nargs has to be in single quotes "+" won't work ...
 	vim.api.nvim_create_user_command(
 		"LekhaGotoChapter",
-		M.goto_chapter,
-		{ desc = "Go to chapter", nargs = "+", complete = M.get_chapter_info_list }
+		M.goto_target,
+		{ desc = "Go to chapter", nargs = "+", complete = M.get_chapter_list }
 	)
 
 	vim.api.nvim_create_user_command(
 		"LekhaGotoTodo",
-		M.goto_todo,
+		M.goto_target,
 		{ desc = "Go to TODO", nargs = "+", complete = M.get_todo_list }
 	)
 
 	vim.api.nvim_create_user_command(
-		"LekhaGotoTarget",
+		"LekhaGoto",
 		M.goto_target,
-		{ desc = "Go to target", nargs = "+", complete = M.get_target_list }
+		{ desc = "Go to target", nargs = "+", complete = M.get_all_targets_list }
 	)
 end
 
