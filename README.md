@@ -2,14 +2,17 @@
 
 ![](lekha.nvim.png)
 
-`Lekha` is a minimalistic (in appearance and function) NeoVim plugin for novel
+`Lekha` is a minimalist (in appearance and function) NeoVim plugin for novel
 writing:
 
-- It uses NeoVim's auto complete feature to display the chapters and word counts
-  when the "jump to chapter" command is called. There is no split pane. This
-  reduces visual clutter but keeps the information accessible.
-- Only looks at top level headings (Lines that start with `# `)
-- [Planned]: TODO and Bookmarks lists
+- It expects the work to be all in one file.
+- Top level headings (Lines that start with `# `) are interpreted as chapters.
+- Lines that start with markdown comments (`<!--`) are interpreted as TODOs.
+- It uses NeoVim's native command auto-complete feature to display chapters,
+  chapter word counts and TODOs when the `LekhaGoto` command is called (Please
+  see screenshot above).
+- There is no split pane. This reduces visual clutter but keeps the information
+  accessible.
 
 
 # Installation
@@ -21,7 +24,7 @@ runtime path. Then add something like this to your `markdown.vim`:
 -- Register Lekha commands
 lua require("lekha").enable()
 -- Register a convenient shortcut key 
-nmap <Tab> :LekhaGotoChapter<Space>
+nmap <Tab> :LekhaGoto<Space>
 ```
 
 Now by hitting Tab twice in normal mode you can access the go to chapter command

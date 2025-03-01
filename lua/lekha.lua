@@ -7,8 +7,9 @@ function words_in_line(line)
    return n
 end
 
--- Treat each top-level heading as a chapter. Count the words for each chapter
-function M.compute_chapter_word_count()
+-- Treat each top-level heading as a chapter. Count the words for each chapter.
+-- Treat all lines begining with <!-- as a TODO mark.
+function M.process_document()
    -- Module variable to store chapter locations and word counts
    chapters = {}
 
@@ -102,17 +103,17 @@ end
 
 function M.enable()
    -- Run the word count explicitly the first time
-   M.compute_chapter_word_count()
+   M.process_document()
 
    -- Run the word count whenever we stop typing
    -- TODO: Only activate it for this buffer?
    vim.api.nvim_create_autocmd("CursorHold", {
       pattern = { "*.md" },
-      callback = M.compute_chapter_word_count,
+      callback = M.process_document,
    })
    vim.api.nvim_create_autocmd("CursorHoldI", {
       pattern = { "*.md" },
-      callback = M.compute_chapter_word_count,
+      callback = M.process_document,
    })
 
    -- :h :command-nargs
