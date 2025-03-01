@@ -7,71 +7,44 @@ function words_in_line(line)
 	return n
 end
 
--- Module variable to store chapter locations and word counts
-local chapters = {}
-
 -- Treat each top-level heading as a chapter. Count the words for each chapter
 function M.compute_chapter_word_count()
-	-- Ordered array table of chapter start lines
-	local start_line_array = {}
-	-- Ordered array table of chapter names
-	local chapter_names = {}
-	-- map chapter name to first line
-	local name_to_line_map = {}
-	-- map start line to chapter info
-	local line_to_info_map = {}
+	-- Module variable to store chapter locations and word counts
+	chapters = {}
 
 	-- Module variable to store todo locations
 	todos = {}
 
+	-- Variables not declared local, create a global variable that
+	-- persists between calls.
 	local lines = vim.api.nvim_buf_get_lines(0, 0, -1, false)
+	table.insert(chapters, {
+		name = "Preamble",
+		line = 0,
+		word_count = 0,
+	})
+	local current_chapter = 1 -- Preamble = 1
 	local chapter_words = 0
-	-- if start is not declared as nil and used in the loop below, apparently
-	-- it declares a module global called start that persists bewtween
-	-- function calls
-	local start = nil
-	local heading = nil
 	for n, line in ipairs(lines) do
 		if line:sub(1, 2) == "# " then
-			if start ~= nil then
-				line_to_info_map[start].word_count = chapter_words
-			end
-			heading = line:sub(3, -1)
-			start = n
-			chapter_words = 0
-			line_to_info_map[start] = {
-				heading = heading,
-				start = start,
+			chapters[current_chapter].word_count = chapter_words
+			table.insert(chapters, {
+				name = line:sub(3, -1),
+				line = n,
 				word_count = 0,
-			}
-			name_to_line_map[heading] = start
-			-- In Lua only an array table can be ordered
-			table.insert(start_line_array, start)
-			table.insert(chapter_names, heading)
-		elseif line:sub(1, 10) == "<!-- TODO:" then
+			})
+			current_chapter = current_chapter + 1
+			chapter_words = 0
+		elseif line:sub(1, 4) == "<!--" then
 			table.insert(todos, {
-				chapter = heading,
-				todo = line:sub(11, -1),
+				chapter = current_chapter,
+				todo = line:sub(5, -1),
 				line = n,
 			})
 		end
-		-- If we're not in a chapter (i.e. in the preamble) we'll just
-		-- discard this count.
 		chapter_words = chapter_words + words_in_line(line)
 	end
-
-	if start ~= nil then
-		line_to_info_map[start].word_count = chapter_words
-	end
-
-	-- In Lua only an array table can be sorted
-	-- table.sort(start_line_array)
-	chapters = {
-		start_line_array = start_line_array,
-		chapter_names = chapter_names,
-		name_to_line_map = name_to_line_map,
-		line_to_info_map = line_to_info_map,
-	}
+	chapters[current_chapter].word_count = chapter_words
 end
 
 -- This returns an array table of strings that are formatted as
@@ -89,9 +62,8 @@ function M.get_chapter_info_list()
 		return chapter_list
 	end
 
-	for i, s in ipairs(chapters.start_line_array) do
-		local info = chapters.line_to_info_map[s]
-		table.insert(chapter_list, string.format("%3d %s (%d)", i, info.heading, info.word_count))
+	for i = 2, #chapters do
+		table.insert(chapter_list, string.format("%3d %s (%d)", i - 1, chapters[i].name, chapters[i].word_count))
 	end
 
 	return chapter_list
@@ -101,6 +73,7 @@ end
 -- args.args carries the full string
 -- args.fargs carries the individual space separated arguments
 -- We just want the first word which is the chapter number
+-- Chapter number needs +1 to get the right index in `chapters`
 function M.goto_chapter(args)
 	if chapters == nil then
 		return
@@ -110,28 +83,26 @@ function M.goto_chapter(args)
 		return
 	end
 
-	local line = chapters.start_line_array[tonumber(args.fargs[1])]
-	if line == nil then
-		return
-	end
+	local line = chapters[tonumber(args.fargs[1]) + 1].line
 	vim.api.nvim_command(tostring(line))
 end
 
 -- Returns a string representation of the chapter the cursor is in
 function M.current_chapter()
 	if chapters == nil then
-		return
+		return ""
 	end
 
-	local current_chapter = "None"
+	local chapter_index = 1
 	row, col = unpack(vim.api.nvim_win_get_cursor(0))
-	for i, sl in ipairs(chapters.start_line_array) do
-		if row < sl then
+	for i, sl in ipairs(chapters) do
+		if row < sl.line then
 			break
 		else
-			current_chapter = string.format("%d %s", i, chapters.chapter_names[i])
+			chapter_index = i
 		end
 	end
+	current_chapter = string.format("%d %s", chapter_index - 1, chapters[chapter_index].name)
 
 	return current_chapter
 end
@@ -147,7 +118,7 @@ function M.get_todo_list()
 	end
 
 	for i, s in ipairs(todos) do
-		table.insert(todo_list, string.format("%3d [%s] %s", i, s.chapter, s.todo))
+		table.insert(todo_list, string.format("%3d [%d] %s", i, s.chapter, s.todo))
 	end
 
 	return todo_list
@@ -171,6 +142,53 @@ function M.goto_todo(args)
 		return
 	end
 	vim.api.nvim_command(tostring(todo.line))
+end
+
+-- List of strings of chapters and TODOs in one go
+-- Format is <Chapter #>.<todo #> <Chapter or TODO name> [(word count)]
+function M.get_target_list()
+	local target_list = {}
+	if chapters == nil then
+		return string_list
+	end
+
+	local todo_i = 1
+	for i = 1, #chapters do
+		table.insert(target_list, string.format("%3d %s (%d)", i - 1, chapters[i].name, chapters[i].word_count))
+		while todo_i <= #todos and todos[todo_i].chapter == i do
+			table.insert(target_list, string.format("%3d.%d %s", i - 1, todo_i, todos[todo_i].todo))
+			todo_i = todo_i + 1
+		end
+	end
+
+	return target_list
+end
+
+-- NeoVim passes in args
+-- args.args carries the full string
+-- args.fargs carries the individual space separated arguments
+-- We just want the first word (args.fargs[1]) which is in the form X.Y
+-- X is the chapter id and Y the todo id (if present)
+function M.goto_target(args)
+	if chapters == nil then
+		return
+	end
+
+	if args.args == nil then
+		return
+	end
+
+	local line = nil
+	-- https://stackoverflow.com/a/15258515
+	local dot_i = args.fargs[1]:find(".", 1, true)
+	if dot_i == nil then
+		-- print(args.fargs[1])
+		line = chapters[tonumber(args.fargs[1]) + 1].line
+	else
+		-- print(args.fargs[1]:sub(dot_i+1, -1))
+		line = todos[tonumber(args.fargs[1]:sub(dot_i + 1, -1))].line
+	end
+	vim.api.nvim_command(tostring(line))
 end
 
 function M.enable()
@@ -200,6 +218,12 @@ function M.enable()
 		"LekhaGotoTodo",
 		M.goto_todo,
 		{ desc = "Go to TODO", nargs = "+", complete = M.get_todo_list }
+	)
+
+	vim.api.nvim_create_user_command(
+		"LekhaGotoTarget",
+		M.goto_target,
+		{ desc = "Go to target", nargs = "+", complete = M.get_target_list }
 	)
 end
 
