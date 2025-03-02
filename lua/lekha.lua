@@ -45,7 +45,7 @@ function M.get_targets_list(arg)
    local target_list = {}
    local todo_i = 1
    for i = 1, #chapters do
-      if arg.chapters then
+      if arg.chapters and i > 1 then -- Don't show the dummy "Preamble" chapter.
          table.insert(target_list, string.format("%3d %s (%d)", i - 1, chapters[i].name, chapters[i].word_count))
       end
       while arg.todos and todo_i <= #todos and todos[todo_i].chapter == i do
@@ -101,6 +101,8 @@ function M.current_chapter()
    return current_chapter
 end
 
+
+-- Set up auto commands and user commands for the plugin to work
 function M.enable()
    -- Run the word count explicitly the first time
    M.process_document()
