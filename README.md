@@ -11,8 +11,8 @@ writing:
 - It uses NeoVim's native command auto-complete feature to display chapters,
   chapter word counts and TODOs when the `LekhaGoto` command is called (Please
   see screenshot above).
-- There is no split pane. This reduces visual clutter but keeps the information
-  accessible.
+- There is no split pane. This reduces visual clutter while keeping the
+  information accessible.
 
 
 # Installation
@@ -27,13 +27,18 @@ lua require("lekha").enable()
 nmap <Tab> :LekhaGoto<Space>
 ```
 
-Now by hitting Tab twice in normal mode you can access the go to chapter command
-and see and navigate through a list of chapters.
+Now by hitting Tab twice in normal mode you can access the `LekhaGoto` command
+and NeoVim's auto-complete will list chapters and TODOs.
 
 ## Use in statusline
 
 Add `%{%v:lua.require'lekha'.current_chapter()%}` to the status line to print 
 the chapter the cursor is in.
+
+## Other commands
+
+`Lekha` supplies two other commands `LekhaGotoChapter` and `LekhaGotoTodo` where
+the auto-completion shows only chapters or TODOs respectively.
 
 
 # Notes
@@ -44,13 +49,12 @@ the chapter the cursor is in.
    for a few things.
 1. Vim/NeoVim's editing efficiency impresses me. I have a 140,000 word
    manuscript and Vim/NeoVim handles it without any issue. I used VS Code for a
-   long time but when I tried editing the manuscript with it the simple task of
+   long time but when I tried editing the manuscript with it, the simple task of
    word wrapping (which needs a plugin on VS Code) broke in a subtle way making
    it unusable. 
-1. The algorithm I used here is a O(N) algorithm (N = manuscript length) and
-   runs every time the file is edited (It runs after there is a pause in
-   editing, not after every keystroke) and takes ~20ms for that size of text
-   which is decently fast for an interpreted, studiously dynamic language.
+1. I used an O(N) algorithm (N = manuscript length). It takes ~20ms to process a
+   140,000 word (~800 kB)text, which is decently fast for an interpreted,
+   studiously dynamic language.
 
 ## Lua/NeoVim API Concepts
 1. Ordered arrays
