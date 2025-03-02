@@ -42,9 +42,15 @@ the chapter the cursor is in.
    written a NeoVim plugin before and didn't know Lua. The NeoVim documentation
    is adequate though I had to supplement with web searches
    for a few things.
-1. Vim/NeoVim's editing efficiency and Lua's speed impresses me. I have a 140,000 word manuscript
-   and the dumb algorithm I implemented here doesn't take any perceptible time
-   to run.
+1. Vim/NeoVim's editing efficiency impresses me. I have a 140,000 word
+   manuscript and Vim/NeoVim handles it without any issue. I used VS Code for a
+   long time but when I tried editing the manuscript with it the simple task of
+   word wrapping (which needs a plugin on VS Code) broke in a subtle way making
+   it unusable. 
+1. The algorithm I used here is a O(N) algorithm (N = manuscript length) and
+   runs every time the file is edited (It runs after there is a pause in
+   editing, not after every keystroke) and takes ~20ms for that size of text
+   which is decently fast for an interpreted, studiously dynamic language.
 
 ## Lua/NeoVim API Concepts
 1. Ordered arrays
