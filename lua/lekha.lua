@@ -7,17 +7,16 @@ function words_in_line(line)
    return n
 end
 
+data_for_buffer = {}
+
 -- Treat each top-level heading as a chapter. Count the words for each chapter.
 -- Treat all lines begining with <!-- as a TODO mark.
 function M.process_document()
-   -- Module variable to store chapter locations and word counts
-   chapters = {}
-
-   -- Module variable to store todo locations
-   todos = {}
-
    -- Variables not declared local, create a global variable that
    -- persists between calls.
+   local chapters = {}
+   local todos = {}
+
    local lines = vim.api.nvim_buf_get_lines(0, 0, -1, false)
    table.insert(chapters, { name = "Preamble", line = 0, word_count = 0 })
    local current_chapter = 1 -- Preamble = 1
@@ -34,13 +33,21 @@ function M.process_document()
       chapter_words = chapter_words + words_in_line(line)
    end
    chapters[current_chapter].word_count = chapter_words
+
+   data_for_buffer[vim.api.nvim_get_current_buf()] = {
+      chapters = chapters,
+      todos = todos,
+   }
 end
 
 -- List of strings of chapters and TODOs in one go
 -- Format is <Chapter #>.<todo #> <Chapter or TODO name> [(word count)]a
 -- https://www.lua.org/pil/5.3.html (named arguments hack)
 function M.get_targets_list(arg)
-   if chapters == nil then return {} end
+   data = data_for_buffer[vim.api.nvim_get_current_buf()]
+   if data == nil then return {} end
+   local chapters = data.chapters
+   local todos = data.todos
 
    local target_list = {}
    local todo_i = 1
@@ -71,7 +78,10 @@ function M.get_all_targets_list() return M.get_targets_list({ chapters = true, t
 -- We just want the first word (args.fargs[1]) which is in the form X.Y
 -- X is the chapter id and Y the todo id (if present)
 function M.goto_target(args)
-   if chapters == nil or args.fargs == nill then return end
+   data = data_for_buffer[vim.api.nvim_get_current_buf()]
+   if data == nil or args.fargs == nil then return end
+   local chapters = data.chapters
+   local todos = data.todos
 
    local line = nil
    -- https://stackoverflow.com/a/15258515
@@ -88,7 +98,10 @@ end
 
 -- Returns a string representation of the chapter the cursor is in
 function M.current_chapter()
-   if chapters == nil then return "" end
+   data = data_for_buffer[vim.api.nvim_get_current_buf()]
+   if data == nil then return "" end
+   local chapters = data.chapters
+   local todos = data.todos
 
    local chapter_index = 1
    row, col = unpack(vim.api.nvim_win_get_cursor(0))
@@ -96,11 +109,11 @@ function M.current_chapter()
       if row < sl.line then break end
       chapter_index = i
    end
-   current_chapter = string.format("%d %s", chapter_index - 1, chapters[chapter_index].name)
+   current_chapter =
+      string.format("%d. %s (%d)", chapter_index - 1, chapters[chapter_index].name, chapters[chapter_index].word_count)
 
    return current_chapter
 end
-
 
 -- Set up auto commands and user commands for the plugin to work
 function M.enable()
