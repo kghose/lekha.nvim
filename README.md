@@ -7,7 +7,12 @@ writing:
 
 - It expects the work to be all in one file.
 - Top level headings (Lines that start with `# `) are interpreted as chapters.
-- Lines that start with markdown comments (`<!--`) are interpreted as TODOs.
+- It periodically computes and displays word counts for chapters and the whole 
+  manuscript. Commented text (`<!-- x y z -->`) is not included in the word 
+count.
+- Lines that contain a string like `TODO:something` appear in a list of TODOs 
+  for each chapter. The `something` has to be a single word. Intended use is to 
+add a `TODO` in a comment block with details of what TODO.
 - It uses NeoVim's native command auto-complete feature to display chapters,
   chapter word counts and TODOs when the `LekhaGoto` command is called (Please
   see screenshot above).
@@ -40,6 +45,9 @@ the chapter the cursor is in.
 `Lekha` supplies two other commands `LekhaGotoChapter` and `LekhaGotoTodo` where
 the auto-completion shows only chapters or TODOs respectively.
 
+# Testing
+
+`lua lekha_test.lua -v`
 
 # Notes
 
@@ -60,6 +68,7 @@ the auto-completion shows only chapters or TODOs respectively.
 1. Ordered arrays
 1. Calling NeoVim commands from Lua
 1. Creating autocommands and commands
+1. Unit testing with [LuaUnit](https://github.com/bluebird75/luaunit)
 
 # References
 

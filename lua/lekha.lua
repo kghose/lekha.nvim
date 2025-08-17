@@ -2,10 +2,57 @@
 
 local M = {}
 
-function words_in_line(line)
-   _, n = line:gsub("%S+", "")
-   return n
+function process_line(state, chapters, todos)
+   -- Start of a new chapter.
+   if not state.in_comment and state.line:sub(1, 2) == "# " then
+      table.insert(chapters, {
+         name = state.line:sub(3, -1),
+         line = state.line_n,
+         word_count = 0,
+      })
+      return
+   end
+
+   -- Find the first todo in the line
+   -- TODOs are meant to be one word reminders
+   -- They are included in word counts and show up in the prints
+   -- They can't span multiple lines.
+   local todo_str = state.line:match("TODO:(%S+)")
+   if todo_str ~= nil then table.insert(todos, { 
+       chapter = #chapters, todo = todo_str, line = state.line_n }) end
+
+   -- Regular line
+   local i = 1
+   while true do
+      if state.in_comment then
+         end_of_comment = state.line:find("-->", i)
+         if end_of_comment == nil then
+            -- Still in the middle of a block comment
+            return
+         else
+            state.in_comment = false
+            i = end_of_comment + 3
+         end
+      else
+         start_of_comment = state.line:find("<!--", i)
+         if start_of_comment == nil then
+            -- No comment on this line
+            _, n = state.line:sub(i, -1):gsub("%S+", "")
+            chapters[#chapters].word_count = chapters[#chapters].word_count + n
+            return
+         else
+            -- Count words till comment
+            _, n = state.line:sub(i, start_of_comment - 1):gsub("%S+", "")
+            chapters[#chapters].word_count = chapters[#chapters].word_count + n
+            i = start_of_comment + 4
+            state.in_comment = true
+         end
+      end
+      -- We should never reach here
+   end
 end
+
+M._only_tests = { process_line = process_line }
 
 data_for_buffer = {}
 
@@ -16,23 +63,17 @@ function M.process_document()
    -- persists between calls.
    local chapters = {}
    local todos = {}
+   local in_comment = false
 
    local lines = vim.api.nvim_buf_get_lines(0, 0, -1, false)
    table.insert(chapters, { name = "Preamble", line = 0, word_count = 0 })
-   local current_chapter = 1 -- Preamble = 1
-   local chapter_words = 0
-   for n, line in ipairs(lines) do
-      if line:sub(1, 2) == "# " then
-         chapters[current_chapter].word_count = chapter_words
-         table.insert(chapters, { name = line:sub(3, -1), line = n, word_count = 0 })
-         current_chapter = current_chapter + 1
-         chapter_words = 0
-      elseif line:sub(1, 4) == "<!--" then
-         table.insert(todos, { chapter = current_chapter, todo = line:sub(5, -1), line = n })
-      end
-      chapter_words = chapter_words + words_in_line(line)
+
+   local state = { line_n = 0, line = "", in_comment = false }
+   for line_n, line in ipairs(lines) do
+      state.line_n = line_n
+      state.line = line
+      process_line(state, chapters, todos)
    end
-   chapters[current_chapter].word_count = chapter_words
 
    data_for_buffer[vim.api.nvim_get_current_buf()] = {
       chapters = chapters,
