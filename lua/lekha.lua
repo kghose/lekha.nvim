@@ -15,9 +15,7 @@ function process_line(state, chapters, todos)
 
    -- Find the first todo in the line
    -- TODOs are meant to be one word reminders
-   -- They are included in word counts and show up in the prints
-   -- They can't span multiple lines.
-   local todo_str = state.line:match("TODO:(%S+)")
+  local todo_str = state.line:match("TODO:(%S+)")
    if todo_str ~= nil then table.insert(todos, { 
        chapter = #chapters, todo = todo_str, line = state.line_n }) end
 
@@ -56,8 +54,7 @@ M._only_tests = { process_line = process_line }
 
 data_for_buffer = {}
 
--- Treat each top-level heading as a chapter. Count the words for each chapter.
--- Treat all lines begining with <!-- as a TODO mark.
+-- Create the table of chapters and todos
 function M.process_document()
    -- Variables not declared local, create a global variable that
    -- persists between calls.
@@ -81,7 +78,7 @@ function M.process_document()
    }
 end
 
--- List of strings of chapters and TODOs in one go
+-- List of strings of chapters and/or TODOs depending on args
 -- Format is <Chapter #>.<todo #> <Chapter or TODO name> [(word count)]a
 -- https://www.lua.org/pil/5.3.html (named arguments hack)
 function M.get_targets_list(arg)
