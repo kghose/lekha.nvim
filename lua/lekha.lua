@@ -15,9 +15,14 @@ function process_line(state, chapters, todos)
 
    -- Find the first todo in the line
    -- TODOs are meant to be one word reminders
-  local todo_str = state.line:match("TODO:(%S+)")
-   if todo_str ~= nil then table.insert(todos, { 
-       chapter = #chapters, todo = todo_str, line = state.line_n }) end
+   local todo_idx = state.line:find("TODO:")
+   if todo_idx ~= nil then
+      table.insert(todos, {
+         chapter = #chapters,
+         todo = state.line:sub(todo_idx + 5, -1):gsub("^%s+",""):gsub("%s+$",""),
+         line = state.line_n,
+      })
+   end
 
    -- Regular line
    local i = 1
