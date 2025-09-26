@@ -19,7 +19,7 @@ function process_line(state, chapters, todos)
    if todo_idx ~= nil then
       table.insert(todos, {
          chapter = #chapters,
-         todo = state.line:sub(todo_idx + 5, -1):gsub("^%s+",""):gsub("%s+$",""),
+         todo = state.line:sub(todo_idx + 5, -1):gsub("^%s+", ""):gsub("%s+$", ""),
          line = state.line_n,
       })
    end
