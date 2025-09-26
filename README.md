@@ -31,9 +31,13 @@ lua require("lekha").enable()
 -- Register a convenient shortcut key 
 nmap <Tab> :LekhaGoto<Space>
 ```
+(For a complete example for `~/.config/nvim/ftplugin/markdown.vim` see
+[this](example-markdown.vim).)
 
 Now by hitting Tab twice in normal mode you can access the `LekhaGoto` command
 and NeoVim's auto-complete will list chapters and TODOs.
+
+Try it out with the [example document](example-text.md)!
 
 ## Use in statusline
 
