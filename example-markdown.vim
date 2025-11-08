@@ -1,38 +1,43 @@
 " Creature comforts for writing a novel with NeoVim
 "
+
+" Hide command bar
+setlocal cmdheight=0 
+
 " Hardwrap at 80 columns
 setlocal textwidth=80
+setlocal formatoptions+=t
+
 " Nice vertical stripe at 80 columns
-set colorcolumn=80
+setlocal colorcolumn=80
 
 " Set block cursor all the time
-set guicursor=n-v-c-i:block
+" setlocal guicursor=n-v-c-i:block
 
 " Activate spelling check
-setlocal spell spelllang=en_us
-setlocal spellfile=spellings.en.utf-8.add
-syntax on
+" setlocal spell spelllang=en_us
+" setlocal spellfile=spellings.en.utf-8.add
+" syntax on
 
-colorscheme morning 
+" colorscheme industry 
 
+" On NeoVim the wordcount call is slow for large files
 " Minimal yet informative status line
 setlocal statusline=
-setlocal statusline+=L%l\ 
+setlocal statusline+=%l/%L\ %f\ 
 " wordcount() doesn't have a cursor_words property for visual mode. We use
 " get() with a fallback otherwise we get an error and the statusline is reset
 " Thanks to @seandewar:matrix.org
-setlocal statusline+=%{get(wordcount(),'cursor_words',get(wordcount(),'visual_words'))}/%{wordcount().words}\ words\ (%P)
+" setlocal statusline+=%{get(wordcount(),'cursor_words',get(wordcount(),'visual_words'))}/%{wordcount().words}\ words\ (%P)
 " Display the file modified flag
 setlocal statusline+=%m
 " Use Lekha's per chapter word count
 setlocal statusline+=%=%{%v:lua.require'lekha'.current_chapter()%}\ 
 
-setlocal signcolumn=yes "Always show gutter
-GitGutterEnable
-hi clear SignColumn
+" Git stuff
+" https://github.com/lewis6991/gitsigns.nvim
+lua require("gitsigns").setup()
 
-" https://github.com/preservim/vim-wordy
-" Wordy adverbs
 
 " Enable https://github.com/kghose/lekha.nvim 
 lua require("lekha").enable()
@@ -45,11 +50,6 @@ nmap <S-Tab> :LekhaGotoTodo<Space>
 " Normal and Insert mode
 autocmd CursorHold *.md ++nested update 
 autocmd CursorHoldI *.md ++nested update
-
-" Run the script to create the epub each time the buffer is written
-" This command is why we need to use ++nested in the previous autocommands 
-" https://neovim.io/doc/user/autocmd.html#autocmd-nested
-" autocmd BufWritePost *.md execute '!./make-book.sh &'
 
 " Handy shortcut to wrap a paragraph
 nmap w gq}
