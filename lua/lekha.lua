@@ -77,9 +77,15 @@ function M.process_document()
       process_line(state, chapters, todos)
    end
 
+   document_word_count = 0
+   for i = 1, #chapters do
+      document_word_count = document_word_count + chapters[i].word_count
+   end
+
    data_for_buffer[vim.api.nvim_get_current_buf()] = {
       chapters = chapters,
       todos = todos,
+      words = document_word_count,
    }
 end
 
@@ -152,8 +158,13 @@ function M.current_chapter()
       if row < sl.line then break end
       chapter_index = i
    end
-   current_chapter =
-      string.format("%d. %s (%d)", chapter_index - 1, chapters[chapter_index].name, chapters[chapter_index].word_count)
+   current_chapter = string.format(
+      "%d. %s (%d / %d)",
+      chapter_index - 1,
+      chapters[chapter_index].name,
+      chapters[chapter_index].word_count,
+      data.words
+   )
 
    return current_chapter
 end
