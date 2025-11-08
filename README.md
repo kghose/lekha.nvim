@@ -49,9 +49,15 @@ the chapter the cursor is in.
 `Lekha` supplies two other commands `LekhaGotoChapter` and `LekhaGotoTodo` where
 the auto-completion shows only chapters or TODOs respectively.
 
-# Testing
+# Development
 
-`lua lekha_test.lua -v`
+Code formatting using stylua. Binary release are at https://github.com/JohnnyMorganz/StyLua/releases
+
+Test using:
+
+```
+lua lekha_test.lua -v
+```
 
 # Notes
 
