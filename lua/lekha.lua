@@ -146,7 +146,7 @@ function M.goto_target(args)
 end
 
 -- Returns a string representation of the chapter the cursor is in
-function M.current_chapter()
+function M.status_line()
    data = data_for_buffer[vim.api.nvim_get_current_buf()]
    if data == nil then return "" end
    local chapters = data.chapters
@@ -158,7 +158,7 @@ function M.current_chapter()
       if row < sl.line then break end
       chapter_index = i
    end
-   current_chapter = string.format(
+   status_line = string.format(
       "%d. %s (%d / %d)",
       chapter_index - 1,
       chapters[chapter_index].name,
@@ -166,7 +166,7 @@ function M.current_chapter()
       data.words
    )
 
-   return current_chapter
+   return status_line
 end
 
 -- Set up auto commands and user commands for the plugin to work

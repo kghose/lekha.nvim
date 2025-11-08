@@ -32,7 +32,7 @@ setlocal statusline+=%l/%L\ %f\
 " Display the file modified flag
 setlocal statusline+=%m
 " Use Lekha's per chapter word count
-setlocal statusline+=%=%{%v:lua.require'lekha'.current_chapter()%}\ 
+setlocal statusline+=%=%{%v:lua.require'lekha'.status_line()%}\ 
 
 " Git stuff
 " https://github.com/lewis6991/gitsigns.nvim
