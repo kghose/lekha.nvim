@@ -32,17 +32,27 @@ lua require("lekha").enable()
 nmap <Tab> :LekhaGoto<Space>
 ```
 (For a complete example for `~/.config/nvim/ftplugin/markdown.vim` see
-[this](example-markdown.vim).)
+[this](markdown.vim).)
 
 Now by hitting Tab twice in normal mode you can access the `LekhaGoto` command
-and NeoVim's auto-complete will list chapters and TODOs.
+and NeoVim's auto-complete will list chapters.
 
 Try it out with the [example document](example-text.md)!
 
 ## Use in statusline
 
-Add `%{%v:lua.require'lekha'.current_chapter()%}` to the status line to print 
-the chapter the cursor is in.
+Add `%{%v:lua.require'lekha'.status_line()%}` to the status line to print useful
+information, like chapter name, chapter wordcount and document word count.
+
+## A note about word counts
+
+NeoVim has a built in `wordcount()` function, but it must be redoing the
+wordcount at each call: I found it made scrolling on NeoVim unusably slow and
+stuttery for documents with > 100,000 words.  
+
+lekha only recomputes things when we stop typing (`CursorHold/CursorHoldI`) so
+it doesn't interrupt our flow. lekha has a document word count property which is
+used in the `status_line` function.
 
 ## Other commands
 
@@ -51,7 +61,8 @@ the auto-completion shows only chapters or TODOs respectively.
 
 # Development
 
-Code formatting using stylua. Binary release are at https://github.com/JohnnyMorganz/StyLua/releases
+Code formatting using stylua. I just use the binary release at
+https://github.com/JohnnyMorganz/StyLua/releases
 
 Test using:
 
