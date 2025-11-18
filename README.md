@@ -22,7 +22,12 @@ add a `TODO` in a comment block with details of what TODO.
 
 # Installation
 
-`git clone` the repository (or just copy the `lua` folder) to somewhere in your
+`git clone` the repository under `.config/nvim/pack/bengal-bionics/start`
+The `bengal-bionics` part is just a name I like, you can call it anything. This
+gets you the [Lekha Lua plugin](lua), the [Lekha colorschemes](color)) and the
+[markdown ftplugin](ftplugin/markdown.vim)
+
+If you just want the Lua plugin, copy the [lua folder](lua) to somewhere in your
 runtime path. Then add something like this to your `markdown.vim`:
 
 ```
@@ -31,8 +36,6 @@ lua require("lekha").enable()
 -- Register a convenient shortcut key 
 nmap <Tab> :LekhaGoto<Space>
 ```
-(For a complete example for `~/.config/nvim/ftplugin/markdown.vim` see
-[this](markdown.vim).)
 
 Now by hitting Tab twice in normal mode you can access the `LekhaGoto` command
 and NeoVim's auto-complete will list chapters.
