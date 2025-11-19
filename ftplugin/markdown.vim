@@ -19,7 +19,8 @@ setlocal colorcolumn=80
 " setlocal spellfile=spellings.en.utf-8.add
 " syntax on
 
-" colorscheme industry 
+" colorscheme lekha-light
+" colorscheme lekha-dark
 
 " On NeoVim the wordcount call is slow for large files
 " Minimal yet informative status line
