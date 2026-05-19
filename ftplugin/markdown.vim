@@ -11,13 +11,10 @@ setlocal formatoptions+=t
 " Nice vertical stripe at 80 columns
 setlocal colorcolumn=80
 
-" Set block cursor all the time
-" setlocal guicursor=n-v-c-i:block
-
 " Activate spelling check
-" setlocal spell spelllang=en_us
-" setlocal spellfile=spellings.en.utf-8.add
-" syntax on
+setlocal spell spelllang=en_us
+setlocal spellfile=spellings.en.utf-8.add
+syntax on
 
 " colorscheme lekha-light
 " colorscheme lekha-dark

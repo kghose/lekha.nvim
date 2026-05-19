@@ -5,8 +5,9 @@ hi clear
 
 let g:colors_name = "lekha-dark"
 
-hi Cursor guibg=yellow
-set guicursor=n-v-c:block-Cursor/lCursor,i-ci-ve:ver90-Cursor
+hi nCursor guifg=white guibg=blue
+hi iCursor guifg=black guibg=white
+setlocal guicursor=n-v-c:block-nCursor,i:block-iCursor
 
 hi htmlH1 gui=underline guifg=yellow
 hi htmlItalic gui=italic

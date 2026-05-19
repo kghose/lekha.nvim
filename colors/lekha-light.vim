@@ -5,8 +5,9 @@ hi clear
 
 let g:colors_name = "lekha-light"
 
-hi Cursor guifg=white guibg=red
-set guicursor=n-v-c:block-Cursor/lCursor,i-ci-ve:ver90-Cursor
+hi nCursor guifg=black guibg=blue
+hi iCursor guifg=white guibg=black
+setlocal guicursor=n-v-c:block-nCursor,i:block-iCursor
 
 hi htmlH1 gui=underline guifg=blue
 hi htmlItalic gui=italic
