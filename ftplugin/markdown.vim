@@ -14,10 +14,15 @@ setlocal colorcolumn=80
 " Activate spelling check
 setlocal spell spelllang=en_us
 setlocal spellfile=spellings.en.utf-8.add
+
+" NeoVim enables treesitter by default now (2026).
+" Additionally, treesitter is enabled at the end of setup
+" so this file has to be moved after/ftplugin to clobber treesitter
 syntax on
+lua vim.treesitter.stop()
 
 " colorscheme lekha-light
-" colorscheme lekha-dark
+colorscheme lekha-dark
 
 " On NeoVim the wordcount call is slow for large files
 " Minimal yet informative status line
