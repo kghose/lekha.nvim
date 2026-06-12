@@ -145,7 +145,8 @@ function M.goto_target(args)
    vim.api.nvim_command(tostring(line))
 end
 
--- Returns a string representation of the chapter the cursor is in
+-- Return status line string
+-- This is cheaper than using some of nvim's built ins.
 function M.status_line()
    data = data_for_buffer[vim.api.nvim_get_current_buf()]
    if data == nil then return "" end
