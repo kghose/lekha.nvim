@@ -62,6 +62,27 @@ used in the `status_line` function.
 `Lekha` supplies two other commands `LekhaGotoChapter` and `LekhaGotoTodo` where
 the auto-completion shows only chapters or TODOs respectively.
 
+## NeoVim + Treesitter + Markdown comments
+
+This was an adventure. In Q2 2026 my markdown comments stopped being syntax
+highlighted. Turns out Neovim enabled Treesitter by default. The html treesitter
+parser is needed to mark off the comment blocks inside Markdown but does not
+come with Neovim. 
+
+I compiled the html parser and put it where treesitter expects it and it
+treesitter did mark off the comments, but it absolutely refused to syntax
+highlight it.
+
+I asked on the Neovim help channels and didn't get a bite, so I gave up and
+disable the fireworks (treesitter) and rely on the old Vim regexp code. 
+
+But we are not done. I put the disable command in `ftplugin/markdown.vim` but it
+didn't seem to take effect. After some thrashing about I learned that treesitter
+is enabled pretty late in startup, so I had to move the thing to
+`after/ftplugin/markdown.vim`. 
+
+These engineers, always changing things.
+
 # Development
 
 Code formatting using stylua. I just use the binary release at
